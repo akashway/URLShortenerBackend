@@ -34,7 +34,6 @@ router.get("/me", authMiddleware, async (req, res) => {
 
 
 router.post('/register', async (req, res) => {
-    console.log("Hello")
     const { name, email, mobile, password } = req.body
 
     try {
@@ -126,6 +125,8 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
 router.delete("/:id", authMiddleware, async (req, res) => {
     const { id } = req.params
+
+    
 
     try {
         if (req.user.id !== id) {
