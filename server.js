@@ -7,6 +7,7 @@ dotenv.config()
 const connectDB=require('./db')
 const userRouter=require('./routes/userRouter')
 const linkRouter=require('./routes/LinkRouter')
+const analyticRouter=require('./routes/AnalyticRouter')
 
 app.use(cors())
 const PORT=process.env.PORT || 3000
@@ -21,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use('/api/user',userRouter)
 app.use('/api/link',linkRouter)
+app.use('/api/analytics',analyticRouter)
 
 app.listen(PORT,(err)=>{
     if(err){

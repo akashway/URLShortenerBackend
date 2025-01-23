@@ -18,9 +18,17 @@ const linkSchema=new mongoose.Schema({
         type:String,
         required:true
     },
+    status:{
+        type:Boolean,
+        default:true
+    },
     expiryDate:{
         type:Date,
         default:null
+    },
+    clickCount:{
+        type:Number,
+        default:0
     },
     user:{
         type:mongoose.Schema.Types.ObjectId,
