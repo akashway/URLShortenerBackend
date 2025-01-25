@@ -6,7 +6,6 @@ const router = express.Router()
 
 
 router.get("/", authMiddleware, async (req, res) => {
-
     try {
         const userId = new mongoose.Types.ObjectId(req.user.id)
         const analytics = await Analytic.find({ user: userId })

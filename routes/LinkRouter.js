@@ -7,9 +7,9 @@ const Analytic = require('../models/analytics')
 const router = express.Router()
 
 
+
 router.get("/myLinks", authMiddleware, async (req, res) => {
     try {
-
         const userId = new mongoose.Types.ObjectId(req.user.id)
         const links = await Link.find({ user: userId })
         return res.status(200).json(links)
@@ -27,7 +27,16 @@ router.post("/", authMiddleware, async (req, res) => {
         const salt = await bcrypt.genSalt(10)
         const hashedString = await bcrypt.hash(originalLink, salt)
         const shortString = hashedString.slice(0, 8)
-        console.log(shortString)
+
+        const today = new Date()
+        const links = await Link.find({ expiryDate: { $lt: today } })
+        for (let link of links) {
+            if (link.expiryDate < today && link.status !== 'Inactive') {
+                link.status = 'Inactive'
+                await link.save()
+            }
+        }
+
         const link = await Link.create({
             originalLink,
             shortLink: shortString,
@@ -35,7 +44,7 @@ router.post("/", authMiddleware, async (req, res) => {
             expiryDate,
             user: req.user.id
         })
-        return res.status(200).json({ message: "Link created succesfully", link})
+        return res.status(200).json({ message: "Link created succesfully", link })
     }
     catch (err) {
         console.log(err)
@@ -88,7 +97,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     }
     catch (err) {
         console.log(err)
-        res.status(400).json({ message: "Error in updating Link info" })
+        return res.status(400).json({ message: "Error in updating Link info" })
     }
 
 })
@@ -109,44 +118,34 @@ router.delete("/:id", authMiddleware, async (req, res) => {
         }
 
         await Link.findByIdAndDelete(id)
-        return res.status(200).json({ message: "Deleted succesfully" })
+        await Analytic.deleteMany({ link: id })
+        return res.status(200).json({ message: "Deleted succesfully from Link and Analytics also" })
     }
     catch (err) {
         console.log(err)
-        res.status(400).json({ message: "Error in Deleting Link" })
+        return res.status(400).json({ message: "Error in Deleting Link" })
     }
 })
 
-router.post("/:id", async (req, res) => {
+
+router.get("/:id", authMiddleware, async (req, res) => {
     const { id } = req.params
-    const {device } = req.body
-    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
     try {
-        const link = await Link.findOne({shortLink:id})
-        if (link) {
-            link.clickCount += 1
-            await link.save()
+        const link = await Link.findById(id)
 
-            const analytics = await Analytic.create({
-                originalLink: link.originalLink,
-                shortLink: link.shortLink,
-                ipAddress,
-                device,
-                link: link._id,
-                user: link.user
-            })
-            res.status(200).json({ success: true, link })
+        if (!link) {
+            return res.status(400).json({ message: "No such links exits with given id" })
         }
-        else {
-            res.status(404).json({ success: false, message: 'Link not found' })
+
+        if (link.user.toString() !== req.user.id) {
+            return res.status(400).json({ message: "You are not owning this link" })
         }
+        return res.status(200).json(link)
     }
     catch (err) {
         console.log(err)
-        res.status(400).json({ message: "Error updating analytics" })
+        return res.status(400).json({ message: "Error in finding link" })
     }
-
 })
 
 module.exports = router

@@ -19,8 +19,9 @@ const linkSchema=new mongoose.Schema({
         required:true
     },
     status:{
-        type:Boolean,
-        default:true
+        type:String,
+        enum:['Active','Inactive'],
+        default:'Active'
     },
     expiryDate:{
         type:Date,
@@ -37,6 +38,23 @@ const linkSchema=new mongoose.Schema({
     }
 })
 
+// linkSchema.pre('save', async function (next){
+//     console.log("aa")
+//     const today=new Date()
+//     const links= await this.model('Link').find({expiryDate:{$lte:today}})
+//     console.log(links)
+//     for(let link of links){
+//         console.log(link.expiryDate)
+//         console.log(today)
+//         console.log(link.status)
+//         if(link.expiryDate<today && link.status!=='Inactive'){
+//             console.log(link)
+//             link.status='Inactive'
+//             await link.save()
+//         }
+//     }
+//     next()
+// })
 
 const Link=mongoose.model('Link',linkSchema)
 

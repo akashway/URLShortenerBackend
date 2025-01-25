@@ -95,9 +95,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
     const { id } = req.params
     const { name, email, mobile } = req.body
 
-    console.log(req.user.id)
-    console.log(id)
-
     if (req.user.id !== id) {
         return res.status(400).json({ message: "You can only update your own account." })
     }
@@ -125,8 +122,6 @@ router.put("/:id", authMiddleware, async (req, res) => {
 
 router.delete("/:id", authMiddleware, async (req, res) => {
     const { id } = req.params
-
-    
 
     try {
         if (req.user.id !== id) {
