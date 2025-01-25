@@ -4,7 +4,7 @@ const mongoose=require('mongoose')
 const linkSchema=new mongoose.Schema({
     createdAt:{
         type:Date,
-        default: Date.now()
+        default: () => Date.now()
     },
     originalLink:{
         type:String,
