@@ -9,9 +9,10 @@ const router = express.Router()
 
 
 router.get("/myLinks", authMiddleware, async (req, res) => {
+    const {limit,offset}=req.query
     try {
         const userId = new mongoose.Types.ObjectId(req.user.id)
-        const links = await Link.find({ user: userId })
+        const links = await Link.find({ user: userId }).skip((offset -1)*limit).limit(limit)
         return res.status(200).json(links)
     }
     catch (err) {

@@ -1,4 +1,5 @@
 const express = require('express')
+const uaParser = require('ua-parser-js');
 const Analytic = require('../models/analytics')
 const Link = require('../models/link')
 const router = express.Router()
@@ -11,7 +12,10 @@ router.get("/:id/clickresponse", async (req, res) => {
 router.get("/:id", async (req, res) => {
     const { id } = req.params
     const userAgent = req.headers['user-agent'];
-    const device = userAgent
+    const parser=new uaParser()
+    const parserResult = parser.setUA(userAgent).getResult()
+    const device=parserResult.os.name
+
     try {
         const link = await Link.findOne({ shortLink: id })
         if (link) {
